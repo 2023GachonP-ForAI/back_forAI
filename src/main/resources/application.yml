@@ -1,0 +1,18 @@
+Server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+file:
+  dir:
+    record: C:\watermelon\record
+    image: C:\watermelon\image
+
+
+spring:
+  devtools:
+    livereload:
+      enabled: true
