@@ -1,5 +1,5 @@
 Server:
-  port: 8080
+  port: 60019
   servlet:
     encoding:
       charset: UTF-8
@@ -8,8 +8,8 @@ Server:
 
 file:
   dir:
-    record: C:\watermelon\record
-    image: C:\watermelon\image
+    record: /home/t23304/record/
+    image: /home/t23304/image/
 
 
 spring:

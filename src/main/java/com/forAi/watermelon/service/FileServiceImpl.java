@@ -27,8 +27,9 @@ public class FileServiceImpl implements FileService {
         // 파일 이름 추출, 변경 후 확장자와 함께 저장
         try {
             File saveFile = new File(fileDir + originName);
-            System.out.println("파일 저장 완료");
             file.transferTo(saveFile);
+            System.out.println("파일 저장 완료");
+            System.out.println("파일 저장 경로 : " + fileDir + "파일 이름 : "+ originName);
             return originName;
         } catch (Exception e) {
             e.printStackTrace();

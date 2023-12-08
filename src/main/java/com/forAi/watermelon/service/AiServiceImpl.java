@@ -2,42 +2,59 @@ package com.forAi.watermelon.service;
 
 import com.forAi.watermelon.dto.RecordResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 
 @Service
 @RequiredArgsConstructor
 public class AiServiceImpl implements AiService {
-    private final FileService fileService;
 
-    private String url = "http://localhost:7000";
-    RestTemplate restTemplate = new RestTemplate();
+    private final String url = "http://localhost:7000";
+
+    WebClient webClient = WebClient.create(url);
+    private RestTemplate restTemplate;
+
+    public AiServiceImpl(RestTemplateBuilder restTemplateBuilder) {
+        this.restTemplate = restTemplateBuilder.build();
+    }
 
     @Override
-    public RecordResponseDto requestAi(String fileName) {
+    public Mono<RecordResponseDto> requestAi(String fileName) {
         try {
-            // RestTemplate를 사용하여 동기적으로 외부 API 요청
-            ResponseEntity<Integer> response = restTemplate.getForEntity(
-                    url + "/ai?record=" + fileName, // URL과 쿼리 파라미터
-                    Integer.class // 응답 타입
-            );
 
-            // 응답 데이터 가져오기
-            Integer responseData = response.getBody();
+            return webClient.get().uri(uriBuilder -> uriBuilder
+                            .path("/ai")
+                            .queryParam("record", fileName)
+                            .build())
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .doOnNext(resMap -> {
+                        System.out.println("받은 값 : " + resMap + "\nfile name : " + fileName);
+                    })
+                    .map(resMap -> {
+                                Integer sweetValue = (Integer) resMap.get("sweet");
+                                return RecordResponseDto
+                                        .builder()
+                                        .recordName(fileName)
+                                        .sweet(sweetValue)
+                                        .build();
+                            });
 
-            // 필요한 경우 파일 삭제
+
+                            // 필요한 경우 파일 삭제
 //            fileService.deleteFile(fileName);
 
-            // 응답 데이터를 이용하여 RecordResponseDto 객체 생성 및 반환
-            return RecordResponseDto.builder()
-                    .recordName(fileName)
-                    .sweet(responseData)
-                    .build();
 
         } catch (Exception e) {
-            throw new RuntimeException("개인영상 분석중 오류: " + e.getMessage(), e);
+            throw new RuntimeException("녹음 분석중 오류: " + e.getMessage());
         }
     }
 }
