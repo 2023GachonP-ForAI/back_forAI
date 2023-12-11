@@ -56,9 +56,9 @@ def ai_endpoint():
         print(result)
 
         if result > 50:
-            return jsonify({'sweet': 1})
+            return jsonify({'sweet': 1}) # 맛있는 수박
         else:
-            return jsonify({'sweet': 0})
+            return jsonify({'sweet': 0}) # 맛없는 수박
     
     # record_value가 None이 아니고 파일이 존재하면 0을 반환, 그렇지 않으면 랜덤으로 0 또는 1을 반환
     # result = 0 if record_value is not None and file_exists else random.choice([0, 1])
