@@ -49,7 +49,7 @@ def ai_endpoint():
         mfccs = preprocess_mfcc(record_path)
         mfccs = np.expand_dims(mfccs, axis=0)
 
-        model = load_model('./model/WATERMELON_CNN-4.hdf5')
+        model = load_model('./home/t23304/ai/AI/model/WATERMELON_CNN-4.hdf5')
         result = model.predict(mfccs)
 
         result = result[0][0]
