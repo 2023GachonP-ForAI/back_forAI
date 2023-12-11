@@ -29,7 +29,6 @@ public class AiServiceImpl implements AiService {
     @Override
     public Mono<RecordResponseDto> requestAi(String fileName) {
         try {
-
             return webClient.get().uri(uriBuilder -> uriBuilder
                             .path("/ai")
                             .queryParam("record", fileName)
@@ -47,12 +46,8 @@ public class AiServiceImpl implements AiService {
                                         .sweet(sweetValue)
                                         .build();
                             });
-
-
                             // 필요한 경우 파일 삭제
 //            fileService.deleteFile(fileName);
-
-
         } catch (Exception e) {
             throw new RuntimeException("녹음 분석중 오류: " + e.getMessage());
         }
