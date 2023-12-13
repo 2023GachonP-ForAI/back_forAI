@@ -17,15 +17,31 @@ public class ApiController {
     private final FileService fileService;
     private final AiService aiService;
 
-    @PostMapping(value = "/result/sweet")
-    public Mono<ResponseEntity<?>> recordSend(@RequestPart MultipartFile file) {
+//    @PostMapping(value = "/result/sweet")
+//    public Mono<ResponseEntity<?>> recordSend(@RequestPart MultipartFile file) {
+//            System.out.println(file.isEmpty());
+//            System.out.println(file.getOriginalFilename());
+//            String fileName = fileService.saveFile(file);
+//            Mono<RecordResponseDto> dto = aiService.requestAi(fileName);
+//            fileService.deleteFile(fileName);
+//            return dto.map(recordResponseDto ->
+//                    ResponseEntity.status(HttpStatus.OK).body(recordResponseDto));
+//
+//    }
 
-            System.out.println(file.isEmpty());
-            System.out.println(file.getOriginalFilename());
-            String fileName = fileService.saveFile(file);
-            Mono<RecordResponseDto> dto = aiService.requestAi(fileName);
+    @PostMapping(value = "/result/sweet")
+    public Mono<ResponseEntity<?>> recordSend(@RequestPart MultipartFile file, @RequestPart String good_record) {
+        if (!good_record.isEmpty()) {
+            Mono<RecordResponseDto> dto = aiService.requestDefault(good_record);
             return dto.map(recordResponseDto ->
                     ResponseEntity.status(HttpStatus.OK).body(recordResponseDto));
+        } else {
+            String fileName = fileService.saveFile(file);
+            Mono<RecordResponseDto> dto = aiService.requestAi(fileName);
+            fileService.deleteFile(fileName);
+            return dto.map(recordResponseDto ->
+                    ResponseEntity.status(HttpStatus.OK).body(recordResponseDto));
+        }
 
     }
 

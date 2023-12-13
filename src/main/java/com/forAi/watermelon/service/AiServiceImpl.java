@@ -52,4 +52,37 @@ public class AiServiceImpl implements AiService {
             throw new RuntimeException("녹음 분석중 오류: " + e.getMessage());
         }
     }
+
+    @Override
+    public Mono<RecordResponseDto> requestDefault(String goodRecord) {
+        try {
+            String fileName;
+            if (goodRecord.equals("true")) {
+                fileName = "true.wav";
+            } else if (goodRecord.equals("false")) {
+                fileName = "false.wav";
+            } else {
+                throw new RuntimeException("true or false 파일 처리중 오류");
+            }
+            return webClient.get().uri(uriBuilder -> uriBuilder
+                            .path("/ai")
+                            .queryParam("record", fileName)
+                            .build())
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .doOnNext(resMap -> {
+                        System.out.println("받은 값 : " + resMap + "\nfile name : " + fileName);
+                    })
+                    .map(resMap -> {
+                        Integer sweetValue = (Integer) resMap.get("sweet");
+                        return RecordResponseDto
+                                .builder()
+                                .recordName(fileName)
+                                .sweet(sweetValue)
+                                .build();
+                    });
+        } catch (Exception e) {
+            throw new RuntimeException("녹음 분석중 오류: " + e.getMessage());
+        }
+    }
 }
