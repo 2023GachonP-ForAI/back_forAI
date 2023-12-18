@@ -4,6 +4,7 @@ import com.forAi.watermelon.dto.RecordRequestDto;
 import com.forAi.watermelon.dto.RecordResponseDto;
 import com.forAi.watermelon.service.AiService;
 import com.forAi.watermelon.service.FileService;
+import com.forAi.watermelon.service.SweetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import reactor.core.publisher.Mono;
 public class ApiController {
     private final FileService fileService;
     private final AiService aiService;
+    private final SweetService sweetService;
 
 //    @PostMapping(value = "/result/sweet")
 //    public Mono<ResponseEntity<?>> recordSend(@RequestPart MultipartFile file) {
@@ -32,15 +34,20 @@ public class ApiController {
     @PostMapping(value = "/result/sweet")
     public Mono<ResponseEntity<?>> recordSend(@RequestPart MultipartFile file, @RequestPart String good_record) {
         if (!good_record.isEmpty()) {
-            Mono<RecordResponseDto> dto = aiService.requestDefault(good_record);
-            return dto.map(recordResponseDto ->
-                    ResponseEntity.status(HttpStatus.OK).body(recordResponseDto));
+            return aiService.requestDefault(good_record)
+                    .doOnNext(sweetService::saveSweet)
+                    .map(recordResponseDto ->
+                            ResponseEntity.status(HttpStatus.OK).body(recordResponseDto));
         } else {
             String fileName = fileService.saveFile(file);
-            Mono<RecordResponseDto> dto = aiService.requestAi(fileName);
-            fileService.deleteFile(fileName);
-            return dto.map(recordResponseDto ->
-                    ResponseEntity.status(HttpStatus.OK).body(recordResponseDto));
+            return aiService.requestAi(fileName)
+                    .flatMap(dto -> {
+                        sweetService.saveSweet(dto);
+                        fileService.deleteFile(dto.getRecordName());
+                        return Mono.just(dto);
+                    })
+                    .map(recordResponseDto ->
+                            ResponseEntity.status(HttpStatus.OK).body(recordResponseDto));
         }
 
     }
